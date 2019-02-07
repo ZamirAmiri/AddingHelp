@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="register.js"></script>
+    </head>
+    <body>
+        <div>
+            <form id="registerForm">
+                    <h3>Register</h3>
+                    <span>Username: <input type="text" name="user_name" id="device_name"></span>
+                    <span>Password: <input type="password" name="user_password" id="device_name"></span>
+                    <span>birth date <input type="date" name="user_birthdate" id="device_name"></span>
+                    <span>email: <input type="email" name="user_email" id="device_name"></span>
+                    <span>gender: <input type="text" name="user_gender" id="device_name"></span>
+
+                    <input type="button" class="button" value="register" onclick=register()>
+                    <input type="reset" class="button" value="Cancel" onclick=hideForm()>
+                </form>
+            <br>
+            <form id="activateAcoountForm">
+                <span>Activate: <input type="text" name="code" id="device_name"></span>
+                <input type="button" class="button" value="register" onclick=activateAccount()>
+            </form>
+            <br>
+            <form id="login">
+                <span>Username: <input type="text" name="user_name" id="device_name"></span><br>
+                <span>Password: <input type="password" name="user_password" id="device_name"></span><br>
+                <input type="button" class="button" value="register" onclick=login()>
+            </form>
+            <br>
+                <input type="button" class="button" value="addHelpCoin" onclick=addHelpCoin()>
+            <br>
+            <form id="adminF">
+                <span>Foundation: <input type="text" name="admin_uname" id="device_name"></span><br>
+                <span>Password: <input type="password" name="admin_password" id="device_name"></span><br>
+                <span>name: <input type="text" name="f_name" id="device_name"></span><br>
+                <span>info: <input type="text" name="f_info" id="device_name"></span><br>
+                <span>logo:<input type="text" name="f_logo" id="device_name"></span><br>
+                <span>Web site:<input type="text" name="f_website" id="device_name"></span><br>
+                <input type="button" class="button" value="submit" onclick=newFoundation()>
+            </form>
+            <br>
+            <form id="follow">
+                <span>Username: <input type="text" name="uname" id="device_name"></span><br>
+                <input type="button" class="button" value="Follow" onclick=follow()>
+            </form>
+            <form id="searchUser">
+                <span>Username: <input type="text" name="uname" id="device_name"></span><br>
+                <input type="button" class="button" value="search user" onclick=searchUser()>
+            </form>
+            <button onclick=update()>UPDATE</button>            
+        </div>
+    </body>
+</html>
