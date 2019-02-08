@@ -51,8 +51,10 @@ public class ActiveUser {
     }
     
     public ActiveUser removeUser(int userID,String sesID){
+        System.out.println("Comparing ".concat(sesID).concat(" AND ").concat(this.session.getId()));
         int check = stringComp(this.session.getId(),sesID);
-        if(userID == this.userid){
+        if(userID == this.userid && check == 1){
+            System.out.println("Deleting closed session ".concat(this.session.getId()));
             return this.cleanUp();
         }else if(check == 0)
         {

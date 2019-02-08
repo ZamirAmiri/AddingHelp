@@ -5,6 +5,7 @@
  */
 package com.addinghelp.websocket;
 
+import com.addinghelp.db.ActiveUserTree;
 import com.addinghelp.db.DBConnect;
 import com.addinghelp.db.DBQueries;
 import java.text.SimpleDateFormat;
@@ -42,6 +43,7 @@ public class UserWebSocketServer {
         public void close(Session session) {
             String query = DBQueries.createLogOutQuery(session.getId());
             DBConnect.quickInsert(query);
+            UserSessionHandler.removeUser(session.getId());
     }
 
     @OnError

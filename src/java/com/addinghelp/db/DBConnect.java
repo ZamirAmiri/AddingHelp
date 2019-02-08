@@ -5,6 +5,7 @@
  */
 package com.addinghelp.db;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -120,7 +121,8 @@ public class DBConnect{
 
     public JsonObject getUserData(int userId) {
         this.query = DBQueries.createGetUserDataQuery(String.valueOf(userId));
-        result = null;
+        System.out.println(this.query);
+        this.result = null;
         JsonProvider provider = JsonProvider.provider();
         JsonObjectBuilder builder = provider.createObjectBuilder();
         
@@ -130,8 +132,8 @@ public class DBConnect{
             try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
                 //here sonoo is database name, root is username and password
                 Statement stmt=con.createStatement();
-                result = stmt.executeQuery(query);
-                if(result.next()){
+                this.result = stmt.executeQuery(query);
+                if(this.result.next()){
                     builder.add("action", "update");
                     builder.add("type", "personal");
                     builder.add("username",result.getString("username"));
@@ -408,6 +410,47 @@ public class DBConnect{
     public void deleteNotifications(int userID) {
         this.query = DBQueries.deleteNotifications(Integer.toString(userID));
         this.connectANDsendINSERT(query);
+    }
+
+    public JsonObject getNewPosts() {
+        this.query = DBQueries.getNewPosts();
+        JsonProvider provider = JsonProvider.provider();
+        JsonArrayBuilder arrBuilder = provider.createArrayBuilder();
+        this.result = null;
+        try{  
+            Class.forName(jdbc);  
+            try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
+                Statement stmt=con.createStatement();
+                this.result = stmt.executeQuery(query);
+                while(this.result.next()){
+                    JsonObjectBuilder builder = provider.createObjectBuilder();
+                    builder.add("short",this.result.getString("short"));
+                    builder.add("content",this.result.getString("content"));
+                    builder.add("title",this.result.getString("title"));
+                    builder.add("foundationname",this.result.getString("foundationname"));
+                    arrBuilder.add(builder);
+                }
+            }
+        }catch(ClassNotFoundException | SQLException e){
+            System.out.println(e.getMessage());
+        }
+        JsonObjectBuilder builder = provider.createObjectBuilder();
+        builder.add("type","newPosts");
+        builder.add("messages", arrBuilder);
+        builder.add("action","update");
+        return builder.build();
+    }
+    
+    public JsonObject getExplore(String id){
+        JsonProvider provider = JsonProvider.provider();
+        JsonArrayBuilder arrBuilder = provider.createArrayBuilder();
+        JsonObjectBuilder builder = provider.createObjectBuilder();
+        arrBuilder.add(getNewPosts());
+        arrBuilder.add(this.getProjects(id, 1));
+        builder.add("type", "explore");
+        builder.add("messages", arrBuilder);
+        builder.add("action","update");
+        return builder.build();
     }
     
 }

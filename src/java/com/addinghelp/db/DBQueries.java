@@ -222,4 +222,10 @@ public class DBQueries {
         return "DELETE FROM `Notifications` WHERE id = " +id;
     }
 
+    static String getNewPosts() {
+        return  "SELECT Posts.short,Posts.content,Posts.title,Foundations.foundationname FROM Posts\n" +
+                "INNER JOIN Foundations ON Posts.foundation = Foundations.id\n" +
+                "ORDER BY Posts.date DESC LIMIT 100;";
+    }
+
 }
