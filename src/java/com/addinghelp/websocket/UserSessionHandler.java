@@ -26,14 +26,15 @@ import javax.json.spi.JsonProvider;
 
 @ApplicationScoped
 public class UserSessionHandler extends Thread {
+
     private final JsonObject message;
     private final DBConnect db;
     private final Session session;
-    private final ActiveUserTree users  = new ActiveUserTree();
-    private final LastUpdateTimer lastupdateTime;
+    private final static ActiveUserTree users  = new ActiveUserTree();
+    private final static Cache trendingProjects = new Cache();
+    private final static Cache newPosts = new Cache();
 
     UserSessionHandler(JsonObject jsonMessage,Session session) {
-        this.lastupdateTime = new LastUpdateTimer();
         this.message    = jsonMessage;
         this.db         = new DBConnect();
         this.session    = session;   
@@ -41,6 +42,7 @@ public class UserSessionHandler extends Thread {
     @Override
     public void run(){
         String action = this.message.getString("action");
+        System.out.println(action);
         if (null != action) switch (action) {
             case "register":
                 this.register();
@@ -186,22 +188,44 @@ public class UserSessionHandler extends Thread {
             case "trending_projects":
                 this.getTrendingProjects();
                 break;
+            case "new_posts":
+                this.getNewPosts();
+                break;
+            case "explore":
+                this.getExplore();
+                break;
             default:
                 break;    
             
         }
     }
     
-    private void getTrendingProjects(){
-        if(lastupdateTime == null || lastupdateTime.needRefresh())
-        {
-            lastupdateTime.setTrendingProjects(this.db.getProjects("0", MIN_PRIORITY));
-            System.out.println(lastupdateTime.getTrendingProjects());
-            lastupdateTime.updateTime();
+    private void getExplore(){
+        this.getNewPosts();
+        this.getTrendingProjects();
+    }
+    
+    private void getNewPosts(){
+        if(newPosts.needRefresh()){
+            newPosts.setCache(this.db.getNewPosts());
+            System.out.println(newPosts.getCache());
+            newPosts.updateTime();
         }else{
             System.out.println("SERVER: Stored data is used");
         }
-            this.sendToSession(lastupdateTime.getTrendingProjects());
+        this.sendToSession(newPosts.getCache());
+    }
+    
+    private void getTrendingProjects(){
+        if(trendingProjects.needRefresh())
+        {
+            trendingProjects.setCache(this.db.getProjects("0", MIN_PRIORITY));
+            System.out.println(trendingProjects.getCache());
+            trendingProjects.updateTime();
+        }else{
+            System.out.println("SERVER: Stored data is used");
+        }
+            this.sendToSession(trendingProjects.getCache());
     }
     private void getOpenProjects(String id){
         System.out.println(this.db.getProjects(id,0).toString());
@@ -444,6 +468,11 @@ public class UserSessionHandler extends Thread {
             query = DBQueries.createClearSpecialRequestQuerie(code);
             DBConnect.quickInsert(query);
         }
+    }
+    static void removeUser(String sessionId) {
+        int userId = users.getUserId(sessionId);
+        if(userId != 0)
+        users.removeUser(userId, sessionId);
     }
 
     

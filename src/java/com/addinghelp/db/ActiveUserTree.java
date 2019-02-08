@@ -31,6 +31,7 @@ public class ActiveUserTree {
     }
     
     public void removeUser(int userID,String sesID){
+        if(this.root != null)
         this.root = this.root.removeUser(userID,sesID);
     }
 

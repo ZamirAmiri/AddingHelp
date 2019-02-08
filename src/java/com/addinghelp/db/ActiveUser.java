@@ -52,7 +52,8 @@ public class ActiveUser {
     
     public ActiveUser removeUser(int userID,String sesID){
         int check = stringComp(this.session.getId(),sesID);
-        if(userID == this.userid){
+        if(userID == this.userid && check == 1){
+            System.out.println("Deleting closed session ".concat(this.session.getId()));
             return this.cleanUp();
         }else if(check == 0)
         {
@@ -89,9 +90,9 @@ public class ActiveUser {
 		char[] a = new char[36];
 		char[] b = new char[36];
 		s1.getChars(0, s1.length(), a, 0);
-		System.out.println(a);
+                //System.out.println(a);
 		s2.getChars(0, s2.length(), b, 0);
-		System.out.println(b);
+		//System.out.println(b);
 		for(int i=0;i<a.length;i++) {
 			//System.out.println("Measuring: ("+a[i] + ","+b[i]+")");
 			if(a[i] < b[i]) {
@@ -127,9 +128,13 @@ public class ActiveUser {
         int check = ActiveUser.stringComp(this.session.getId(),sessionID);
         switch (check) {
             case 0:
+                if(this.L != null)
                 return this.L.getUserId(sessionID);
+                return 0;
             case 2:
+                if(this.R != null)
                 return this.R.getUserId(sessionID);
+                return 0;
             default:
                 return this.userid;
         }
