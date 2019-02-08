@@ -354,7 +354,7 @@ public class DBConnect{
         if(type == 0){
             builder.add("type","openprojects");
         }else{
-            builder.add("type","trendingprojects");
+            builder.add("type","trending_projects");
         }
         builder.add("messages", arrBuilder);
         builder.add("action","update");
@@ -427,6 +427,7 @@ public class DBConnect{
                     builder.add("short",this.result.getString("short"));
                     builder.add("content",this.result.getString("content"));
                     builder.add("title",this.result.getString("title"));
+                    builder.add("hashtags",this.result.getString("hashtags"));
                     builder.add("foundationname",this.result.getString("foundationname"));
                     arrBuilder.add(builder);
                 }
@@ -435,7 +436,7 @@ public class DBConnect{
             System.out.println(e.getMessage());
         }
         JsonObjectBuilder builder = provider.createObjectBuilder();
-        builder.add("type","newPosts");
+        builder.add("type","new_posts");
         builder.add("messages", arrBuilder);
         builder.add("action","update");
         return builder.build();

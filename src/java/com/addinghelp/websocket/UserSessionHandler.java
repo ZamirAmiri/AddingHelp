@@ -191,10 +191,18 @@ public class UserSessionHandler extends Thread {
             case "new_posts":
                 this.getNewPosts();
                 break;
+            case "explore":
+                this.getExplore();
+                break;
             default:
                 break;    
             
         }
+    }
+    
+    private void getExplore(){
+        this.getNewPosts();
+        this.getTrendingProjects();
     }
     
     private void getNewPosts(){

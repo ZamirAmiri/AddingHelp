@@ -215,6 +215,7 @@ public class DBQueries {
                 "INNER JOIN Users ON Projects.user = Users.id\n" +
                 "INNER JOIN Foundations ON FoundationProject.foundation = Foundations.id\n" +
                 "WHERE Donations.project IN (SELECT Projects.id FROM Projects WHERE Projects.creationdate >= ADDDATE(CURRENT_DATE,INTERVAL -7 DAY))\n" +
+                "GROUP BY FoundationProject.projectname\n"+
                 "ORDER BY totalHelpcoins DESC LIMIT 10";
     }
 
@@ -223,7 +224,7 @@ public class DBQueries {
     }
 
     static String getNewPosts() {
-        return  "SELECT Posts.short,Posts.content,Posts.title,Foundations.foundationname FROM Posts\n" +
+        return  "SELECT Posts.short,Posts.content,Posts.hashtags,Posts.title,Foundations.foundationname FROM Posts\n" +
                 "INNER JOIN Foundations ON Posts.foundation = Foundations.id\n" +
                 "ORDER BY Posts.date DESC LIMIT 100;";
     }
