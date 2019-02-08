@@ -471,6 +471,7 @@ public class UserSessionHandler extends Thread {
     }
     static void removeUser(String sessionId) {
         int userId = users.getUserId(sessionId);
+        if(userId != 0)
         users.removeUser(userId, sessionId);
     }
 
