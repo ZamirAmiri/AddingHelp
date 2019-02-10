@@ -163,7 +163,7 @@ public class DBQueries {
     }
 
     static String getNotifications(int userID) {
-        return "SELECT `info` FROM Notifications WHERE id = "+Integer.toString(userID);
+        return "SELECT `info`,`date` FROM Notifications WHERE id = "+Integer.toString(userID)+ " ORDER BY date DESC";
     }
 
     static String getOpenProjects(String id){

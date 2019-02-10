@@ -263,7 +263,7 @@ public class UserSessionHandler extends Thread {
     private void getNotifications(int userID){
         System.out.println(this.db.getNotifications(userID).toString());
         this.sendToSession(this.db.getNotifications(userID));
-        this.db.deleteNotifications(userID);
+        //this.db.deleteNotifications(userID);
     }
     
     private void search(int cmd){

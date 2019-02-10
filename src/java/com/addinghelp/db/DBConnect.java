@@ -275,7 +275,8 @@ public class DBConnect{
                 result = stmt.executeQuery(this.query);
                 while(result.next()){
                     JsonObjectBuilder builder = provider.createObjectBuilder();
-                    builder.add("message", result.getString("info"));
+                    builder.add("info", result.getString("info"));
+                    builder.add("date", result.getString("date"));
                     arrBuilder.add(builder);
                 }
             }
