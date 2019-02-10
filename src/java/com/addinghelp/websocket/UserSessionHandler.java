@@ -132,7 +132,11 @@ public class UserSessionHandler extends Thread {
     
     
     private void donate(){
+        boolean trending = false;
         int userId = users.getUserId(this.session.getId());
+        if((Object) this.message.getBoolean("trending") != null){
+            trending = this.message.getBoolean("trending");
+        }
         String username = this.message.getString("username");
         int coins = this.message.getInt("coins");
         if(db.userCoinCheck(userId,coins)){
@@ -150,6 +154,9 @@ public class UserSessionHandler extends Thread {
             DBConnect.quickInsert(query);
         }else{
             //TODO: send not enough coins alert.
+        }
+        if(trending != true){
+            trendingProjects.refresh();
         }
         
     }
@@ -474,6 +481,5 @@ public class UserSessionHandler extends Thread {
         if(userId != 0)
         users.removeUser(userId, sessionId);
     }
-
-    
+ 
 }

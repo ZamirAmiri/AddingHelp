@@ -402,8 +402,8 @@ public class DBConnect{
         }
         JsonObjectBuilder builder = provider.createObjectBuilder();
         builder.add("action","update");
-        builder.add("type","people_you_might_know");
         builder.add("messages", arrBuilder);
+        builder.add("type","people_you_might_know");
         return builder.build();
     }
 
