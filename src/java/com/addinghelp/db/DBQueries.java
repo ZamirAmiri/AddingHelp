@@ -229,4 +229,18 @@ public class DBQueries {
                 "ORDER BY Posts.date DESC LIMIT 100;";
     }
 
+    public static String checkIfAlreadyFollowed(String userId, String user) {
+        return "SELECT Users.username FROM Users INNER JOIN Subscriptions ON Users.id = Subscriptions.helpee "
+                + "AND Subscriptions.helpee IN (SELECT id FROM Users WHERE username = '"+user+"') "
+                + "AND Subscriptions.helper = " + userId;
+    }
+
+    public static String createFollowingNotification(boolean result, String username, int userId) {
+        if(result){
+            return "INSERT INTO `Notifications` (`id`, `info`, `date`) VALUES ((SELECT `id` FROM Users WHERE `username` = '"+username+"'), CONCAT((SELECT `username` from Users WHERE `id`= "+userId+"), \' has started helping you back.\'), CURRENT_TIMESTAMP)";
+        }else{
+            return "INSERT INTO `Notifications` (`id`, `info`, `date`) VALUES ((SELECT `id` FROM Users WHERE `username` = '"+username+"'), CONCAT((SELECT `username` from Users WHERE `id`= "+userId+"), \' has started helping you.\'), CURRENT_TIMESTAMP)";
+        }
+    }
+
 }

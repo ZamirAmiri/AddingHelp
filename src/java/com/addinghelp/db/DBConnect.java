@@ -100,7 +100,7 @@ public class DBConnect{
     
     public boolean connectANDsendIsUnique(String query){
         result = null;
-        int r = 0;
+        Object r = null;
         try{  
             Class.forName(jdbc);  
             //here sonoo is database name, root is username and password
@@ -109,14 +109,14 @@ public class DBConnect{
                 Statement stmt=con.createStatement();
                 result = stmt.executeQuery(query);
                 result.next();
-                r= result.getInt(1);
+                r = result.getObject(1);
                 //System.out.println("Value: " +Integer.toString(r));
                 //result.close();
             }
         }catch(ClassNotFoundException | SQLException e){
             System.out.println(e);
         }
-        return r == 0;
+        return (result != null);
     }
 
     public JsonObject getUserData(int userId) {
@@ -242,7 +242,7 @@ public class DBConnect{
                 result = stmt.executeQuery(query);
                 while(result.next()){
                         JsonObjectBuilder builder = provider.createObjectBuilder();
-                        builder.add("foundationProject", result.getString("name"));
+                        builder.add("foundationProject", result.getString("projectname"));
                         builder.add("goal", result.getString("goal"));
                         builder.add("helpcoins",result.getString("helpcoins"));
                         builder.add("creationdate",result.getString("creationdate"));
@@ -443,12 +443,12 @@ public class DBConnect{
         return builder.build();
     }
     
-    public JsonObject getExplore(String id){
+    public JsonObject getExplore(){
         JsonProvider provider = JsonProvider.provider();
         JsonArrayBuilder arrBuilder = provider.createArrayBuilder();
         JsonObjectBuilder builder = provider.createObjectBuilder();
-        arrBuilder.add(getNewPosts());
-        arrBuilder.add(this.getProjects(id, 1));
+        arrBuilder.add(this.getNewPosts());
+        arrBuilder.add(this.getProjects("empty", 1));
         builder.add("type", "explore");
         builder.add("messages", arrBuilder);
         builder.add("action","update");

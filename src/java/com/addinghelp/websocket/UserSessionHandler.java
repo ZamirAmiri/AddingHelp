@@ -134,7 +134,7 @@ public class UserSessionHandler extends Thread {
     private void donate(){
         boolean trending = false;
         int userId = users.getUserId(this.session.getId());
-        if((Object) this.message.getBoolean("trending") != null){
+        if(!this.message.isNull("trending")){
             trending = this.message.getBoolean("trending");
         }
         String username = this.message.getString("username");
@@ -292,6 +292,10 @@ public class UserSessionHandler extends Thread {
         user = this.message.getString("username");
         query = DBQueries.createFollowingQuery(String.valueOf(userID), user);
         System.out.println(query);
+        DBConnect.quickInsert(query);
+        query = DBQueries.checkIfAlreadyFollowed(String.valueOf(userID),user);
+        boolean result = this.db.connectANDsendIsUnique(query);
+        query = DBQueries.createFollowingNotification(result,user,userID);
         DBConnect.quickInsert(query);
     }
     
