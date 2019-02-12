@@ -133,14 +133,15 @@ public class UserSessionHandler extends Thread {
     
     private void donate(){
         boolean trending = false;
-        int userId = users.getUserId(this.session.getId());
+        String userId = String.valueOf(users.getUserId(this.session.getId()));
         if(!this.message.isNull("trending")){
             trending = this.message.getBoolean("trending");
         }
         String username = this.message.getString("username");
-        int coins = this.message.getInt("coins");
-        if(db.userCoinCheck(userId,coins)){
-            String query =  DBQueries.removeCoin(String.valueOf(userId),String.valueOf(coins));
+        String coins = String.valueOf(this.message.getInt("coins"));
+        String query= DBQueries.checkProjectCompletion(userId);
+        if(db.userCoinCheck(userId,coins) && db.connectAndCheck(query)){
+            query =  DBQueries.removeCoin(String.valueOf(userId),String.valueOf(coins));
             //System.out.println(query);
             DBConnect.quickInsert(query);
             query =  DBQueries.createDonateQuery(String.valueOf(userId),username,String.valueOf(coins));
@@ -161,7 +162,7 @@ public class UserSessionHandler extends Thread {
         
     }
     private void update(){
-        int userId = users.getUserId(this.session.getId());
+        String userId = String.valueOf(users.getUserId(this.session.getId()));
         String type = this.message.getString("type");
         switch(type){
             case "personal":
@@ -187,10 +188,10 @@ public class UserSessionHandler extends Thread {
                 break;
             case "openproject":
                 //Get Projects of the people you follow
-                this.getOpenProjects(Integer.toString(userId));
+                this.getOpenProjects(userId);
                 break;
             case "people_you_might_know":
-                this.getPeopleYouMightKnow(Integer.toString(userId));
+                this.getPeopleYouMightKnow(userId);
                 break;
             case "trending_projects":
                 this.getTrendingProjects();
@@ -242,25 +243,25 @@ public class UserSessionHandler extends Thread {
         System.out.println(this.db.getPeopleYouMightKnow(id).toString());
         this.sendToSession(this.db.getPeopleYouMightKnow(id));
     }
-    private void getFollowers(int userId){
+    private void getFollowers(String userId){
         System.out.println(this.db.getHelpingORHelping(userId, false).toString());
         this.sendToSession(this.db.getHelpingORHelping(userId, false));
     }
-    private void getFollowing(int userId){
+    private void getFollowing(String userId){
         System.out.println(this.db.getHelpingORHelping(userId, true).toString());
         this.sendToSession(this.db.getHelpingORHelping(userId, true));
     }
-    private void getProjectsInfoFromUser(int userID)
+    private void getProjectsInfoFromUser(String userID)
     {
         System.out.println(this.db.getProjectsInfo(userID).toString());
         this.sendToSession(this.db.getProjectsInfo(userID));
     }
-    private void getUserData(int userID){
+    private void getUserData(String userID){
         System.out.println(this.db.getUserData(userID).toString());
         this.sendToSession(this.db.getUserData(userID));
     }
     
-    private void getNotifications(int userID){
+    private void getNotifications(String userID){
         System.out.println(this.db.getNotifications(userID).toString());
         this.sendToSession(this.db.getNotifications(userID));
         //this.db.deleteNotifications(userID);
@@ -286,22 +287,27 @@ public class UserSessionHandler extends Thread {
         System.out.println(this.db.connectAndSearchFoundation(arg));
     }
     private void follow(){
-        int userID;
+        String userID;
         String user,query;
-        userID = users.getUserId(this.session.getId());
+        userID = String.valueOf(users.getUserId(this.session.getId()));
         user = this.message.getString("username");
-        query = DBQueries.createFollowingQuery(String.valueOf(userID), user);
-        System.out.println(query);
-        DBConnect.quickInsert(query);
-        query = DBQueries.checkIfAlreadyFollowed(String.valueOf(userID),user);
-        boolean result = this.db.connectANDsendIsUnique(query);
-        query = DBQueries.createFollowingNotification(result,user,userID);
-        DBConnect.quickInsert(query);
+        query = DBQueries.checkIfAlreadyFollowed(userID, user);
+        if(!this.db.connectAndCheck(query)){
+            query = DBQueries.createFollowingQuery(String.valueOf(userID), user);
+            System.out.println(query);
+            DBConnect.quickInsert(query);
+            query = DBQueries.checkIfAlreadyFollowed(String.valueOf(userID),user);
+            boolean result = this.db.connectAndCheck(query);
+            query = DBQueries.createFollowingNotification(result,user,userID);
+            DBConnect.quickInsert(query);
+        }else{
+            System.out.println("User already follows the other person");
+        }
     }
     
     private void addHelpCoin(){
         System.out.println("Adding Coin");
-        int userID = users.getUserId(this.session.getId());
+        String userID = String.valueOf(users.getUserId(this.session.getId()));
         int coins = this.message.getInt("coins");
         String query = DBQueries.createAddingHelpingCoinQuery(String.valueOf(userID),String.valueOf(coins));
         DBConnect.quickInsert(query);
@@ -315,11 +321,11 @@ public class UserSessionHandler extends Thread {
         birthdate = this.message.getString("birthdate");
         gender = this.message.getString("gender");
         query = DBQueries.checkNewUserName(name);
-        Boolean result = this.db.connectANDsendIsUnique(query);
+        Boolean result = this.db.connectAndCheck(query);
         JsonObject msg = null;
         if(result){
             query = DBQueries.checkNewUserEmail(email);
-            result = this.db.connectANDsendIsUnique(query);
+            result = this.db.connectAndCheck(query);
             if(result){
                 code = generateCode(0);
                 query = this.createRegisterQuery(name,pass,email,birthdate,gender,code);
@@ -393,7 +399,7 @@ public class UserSessionHandler extends Thread {
                     "FROM SpecialRequests\n" +
                     "WHERE code = " + code;
         }
-        return this.db.connectANDsendIsUnique(query);
+        return this.db.connectAndCheck(query);
     }
     private void login(){
         int userID = Login.authenticate(this.message);
@@ -485,5 +491,4 @@ public class UserSessionHandler extends Thread {
         if(userId != 0)
         users.removeUser(userId, sessionId);
     }
- 
 }

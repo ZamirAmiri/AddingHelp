@@ -5,7 +5,6 @@
  */
 package com.addinghelp.db;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -98,7 +97,7 @@ public class DBConnect{
     
     
     
-    public boolean connectANDsendIsUnique(String query){
+    public boolean connectAndCheck(String query){
         result = null;
         Object r = null;
         try{  
@@ -119,8 +118,8 @@ public class DBConnect{
         return (result != null);
     }
 
-    public JsonObject getUserData(int userId) {
-        this.query = DBQueries.createGetUserDataQuery(String.valueOf(userId));
+    public JsonObject getUserData(String userId) {
+        this.query = DBQueries.createGetUserDataQuery(userId);
         System.out.println(this.query);
         this.result = null;
         JsonProvider provider = JsonProvider.provider();
@@ -145,6 +144,7 @@ public class DBConnect{
                     builder.add("accumulated",result.getInt("accumulated"));
                     builder.add("followers",result.getInt("followers"));
                     builder.add("following",result.getInt("following"));
+                    builder.add("completed_projects", result.getInt("completed_projects"));
                 }
             }
         }catch(ClassNotFoundException | SQLException e){
@@ -209,10 +209,9 @@ public class DBConnect{
         return arrBuilder.build();
     }
 
-    public boolean userCoinCheck(int userId, int coins) {
-        query = "SELECT * FROM Users WHERE `id` = "+String.valueOf(userId) + " AND `helpcoins` >= " + Integer.toString(coins);
+    public boolean userCoinCheck(String userId, String coins) {
+        query = "SELECT * FROM Users WHERE `id` = "+userId + " AND `helpcoins` >= " + coins;
         this.result = null;
-        int flag = 0;
         try{  
             Class.forName(jdbc);  
             try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
@@ -228,7 +227,7 @@ public class DBConnect{
         return false;
     }
 
-    public JsonObject getProjectsInfo(int userId) {
+    public JsonObject getProjectsInfo(String userId) {
         this.result = null;
         this.query = DBQueries.createGetProjectsQueryFromUser(userId);
         JsonProvider provider = JsonProvider.provider();
@@ -263,7 +262,7 @@ public class DBConnect{
 
 
     /* Change if met foto */
-    public JsonObject getNotifications(int userID) {
+    public JsonObject getNotifications(String userID) {
         JsonProvider provider = JsonProvider.provider();
         JsonArrayBuilder arrBuilder = provider.createArrayBuilder();
         result = null;
@@ -290,11 +289,11 @@ public class DBConnect{
         return builder.build();
     }
 
-    public JsonObject getHelpingORHelping(int userId,boolean helpers) {
+    public JsonObject getHelpingORHelping(String userId,boolean helpers) {
         if(helpers){
-            this.query = DBQueries.createGetHelpersQuery(Integer.toString(userId));
+            this.query = DBQueries.createGetHelpersQuery(userId);
         }else{
-            this.query = DBQueries.creategetHelpingQuery(Integer.toString(userId));
+            this.query = DBQueries.creategetHelpingQuery(userId);
         }
         JsonProvider provider = JsonProvider.provider();
         JsonArrayBuilder arrBuilder = provider.createArrayBuilder();
@@ -454,5 +453,4 @@ public class DBConnect{
         builder.add("action","update");
         return builder.build();
     }
-    
 }

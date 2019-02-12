@@ -32,7 +32,7 @@ class Login {
     }
     
     public static void login(int id,String session) {
-        String query = DBQueries.createInsertActiveUserQuery(id,session);
+        String query = DBQueries.createInsertActiveUserQuery(String.valueOf(id),session);
         System.out.println("QUERY: "+query);
         DBConnect.quickInsert(query);
     }

@@ -11,12 +11,12 @@ package com.addinghelp.db;
  */
 public class DBQueries {
 
-    public static String createUploadPictureQuery(int userID, String encodedPicture) {
-        return "UPDATE Users SET picture='"+encodedPicture+"' WHERE id = "+Integer.toString(userID);
+    public static String createUploadPictureQuery(String userID, String encodedPicture) {
+        return "UPDATE Users SET picture='"+encodedPicture+"' WHERE id = "+userID;
     }
 
-    public static String createInsertActiveUserQuery(int id, String session) {
-        return "INSERT INTO ActiveUsers(userId, Session) VALUES ("+Integer.toString(id)+",'"+session+"')";
+    public static String createInsertActiveUserQuery(String id, String session) {
+        return "INSERT INTO ActiveUsers(userId, Session) VALUES ("+id+",'"+session+"')";
     }
     public static String createLogInQuery(String username, String password) {
         return("Select id from Users WHERE username = '"+username+ "' AND password = '"+password+"'");
@@ -36,37 +36,37 @@ public class DBQueries {
         return "DELETE FROM UnverifiedUsers WHERE activationcode ='"+ code+"'";
     }
     
-    public static String createSubscribeQuery(int userID,int helpingID){
-        return "INSERT INTO Subscriptions(user, helping) VALUES ("+Integer.toString(userID)+","+Integer.toString(helpingID)+")";
+    public static String createSubscribeQuery(String userID,String helpingID){
+        return "INSERT INTO Subscriptions(user, helping) VALUES ("+userID+","+helpingID+")";
     }
-    public static String createPrivateProject(String projectName, int userID, int goal, int priv){
+    public static String createPrivateProject(String projectName, String userID, String goal, String priv){
         return "INSERT INTO project("
-                + "name, user, goal, private, impactpoints, helpcoins)"
+                + "name, user, goal, private, impactpoStrings, helpcoins)"
                 + " VALUES ("
                 + "'"+projectName+"',"
-                + Integer.toString(userID) + ","
-                + Integer.toString(goal) + ","
-                + Integer.toString(priv)+","
+                + userID + ","
+                + goal + ","
+                + priv +","
                 + Integer.toString(0) +","
                 + Integer.toString(0)+")";
     }
-    public static String createPublicProject(String projectName, int userID, int goal, int priv, String rewardDescription, String rewardType, String rewardURL){
+    public static String createPublicProject(String projectName, String userID, String goal, String priv, String rewardDescription, String rewardType, String rewardURL){
         return "INSERT INTO project("
-                + "name, user, goal, private, impactpoints,rewarddescription, rewardtype, rewardurl, helpcoins)"
+                + "name, user, goal, private, impactpoStrings,rewarddescription, rewardtype, rewardurl, helpcoins)"
                 + " VALUES ("
                 + "'"+projectName+"',"
-                + Integer.toString(userID)  + ","
-                + Integer.toString(goal)    + ","
-                + Integer.toString(priv)    +","
+                + userID  + ","
+                + goal    + ","
+                + priv    +","
                 + Integer.toString(0)       +",'"
                 + rewardDescription         +"','"
                 + rewardType                +"','"
                 + rewardURL                 +"',"
                 + Integer.toString(0)+")";
     }
-    public static String createProjectParticipationQuery(String projectName, int userID){
+    public static String createProjectParticipationQuery(String projectName, String userID){
         String project = DBQueries.selectProject(projectName);
-        return "INSERT INTO projectparticipation(project, user) VALUES ("+project+","+Integer.toString(userID)+")";
+        return "INSERT INTO projectparticipation(project, user) VALUES ("+project+","+userID+")";
     }
     
     public static String createprojectPropositions(String projectName,String propositionName){
@@ -105,6 +105,7 @@ public class DBQueries {
 
     public static String createGetUserDataQuery(String userId) {
         return "SELECT username, birthdate, email, gender, helpcoins, accumulated,"
+                + "(SELECT COUNT(Projects.id) AS value FROM Projects WHERE Projects.user = "+userId+" AND Projects.completiondate IS NOT NULL) AS completed_projects,"
                 + "(SELECT COUNT(helper) FROM Subscriptions WHERE helpee = "+userId+" ) AS followers ,"
                 + "(SELECT COUNT(helpee) FROM Subscriptions WHERE helper = "+userId+" ) AS following"
                 + " FROM Users WHERE id='"+ userId +"'";
@@ -126,10 +127,10 @@ public class DBQueries {
         return "UPDATE Users SET helpcoins= Users.helpcoins - "+nrCoins+" WHERE Users.id = "+ userId;
     }
 
-    public static String createGetProjectsQueryFromUser(int userId) {
+    public static String createGetProjectsQueryFromUser(String userId) {
         return "SELECT FoundationProject.projectname,Projects.goal,Projects.helpcoins,Projects.creationdate, Projects.completiondate "
                 + "FROM Projects  INNER JOIN FoundationProject ON FoundationProject.id = Projects.foundationProject "
-                + "WHERE Projects.user = "+String.valueOf(userId);
+                + "WHERE Projects.user = "+userId;
     }
 
     public static String creategetHelpingQuery(String userId) {
@@ -162,8 +163,8 @@ public class DBQueries {
                 + ") as tem;";
     }
 
-    static String getNotifications(int userID) {
-        return "SELECT `info`,`date` FROM Notifications WHERE id = "+Integer.toString(userID)+ " ORDER BY date DESC";
+    static String getNotifications(String userID) {
+        return "SELECT `info`,`date` FROM Notifications WHERE id = "+userID+ " ORDER BY date DESC";
     }
 
     static String getOpenProjects(String id){
@@ -192,8 +193,8 @@ public class DBQueries {
         return "DELETE FROM `SpecialRequests` WHERE code = "+code;
     }
 
-    public static String createDonationNotification(int userId, String username, int coins) {
-        return "INSERT INTO `Notifications` (`id`, `info`, `date`) VALUES ((SELECT `id` FROM Users WHERE `username` = '"+username+"'), CONCAT((SELECT `username` from Users WHERE `id`= "+userId+"), \' has donated "+String.valueOf(coins)+" coints to your project.\'), CURRENT_TIMESTAMP)";
+    public static String createDonationNotification(String userId, String username, String coins) {
+        return "INSERT INTO `Notifications` (`id`, `info`, `date`) VALUES ((SELECT `id` FROM Users WHERE `username` = '"+username+"'), CONCAT((SELECT `username` from Users WHERE `id`= "+userId+"), \' has donated "+coins+" coStrings to your project.\'), CURRENT_TIMESTAMP)";
     }
 
     static String createPeopleYouMightKnowQuery(String id) {
@@ -203,8 +204,8 @@ public class DBQueries {
                 "WHERE Subscriptions.helper IN (SELECT `helper` FROM Subscriptions WHERE helpee = "+id+") AND helpee != "+id+" GROUP BY Users.username ORDER BY common DESC LIMIT 10";
     }
 
-    public static String registerDonation(int userId, String username, int coins) {
-        return "INSERT INTO `Donations`(`user`, `helpcoins`, `project`) VALUES ("+userId+","+String.valueOf(coins)+",(SELECT Projects.id FROM Projects WHERE Projects.user = (SELECT Users.id FROM Users WHERE Users.username = '"+username+"') AND Projects.completiondate IS NULL))";
+    public static String registerDonation(String userId, String username, String coins) {
+        return "INSERT INTO `Donations`(`user`, `helpcoins`, `project`) VALUES ("+userId+","+coins+",(SELECT Projects.id FROM Projects WHERE Projects.user = (SELECT Users.id FROM Users WHERE Users.username = '"+username+"') AND Projects.completiondate IS NULL))";
     }
     
     public static String trendingProjects(){
@@ -235,12 +236,15 @@ public class DBQueries {
                 + "AND Subscriptions.helper = " + userId;
     }
 
-    public static String createFollowingNotification(boolean result, String username, int userId) {
+    public static String createFollowingNotification(boolean result, String username, String userId) {
         if(result){
             return "INSERT INTO `Notifications` (`id`, `info`, `date`) VALUES ((SELECT `id` FROM Users WHERE `username` = '"+username+"'), CONCAT((SELECT `username` from Users WHERE `id`= "+userId+"), \' has started helping you back.\'), CURRENT_TIMESTAMP)";
         }else{
             return "INSERT INTO `Notifications` (`id`, `info`, `date`) VALUES ((SELECT `id` FROM Users WHERE `username` = '"+username+"'), CONCAT((SELECT `username` from Users WHERE `id`= "+userId+"), \' has started helping you.\'), CURRENT_TIMESTAMP)";
         }
+    }
+    public static String checkProjectCompletion(String userId){
+        return "SELECT `id` FROM Projects WHERE user = "+userId+" AND completiondate IS NULL";
     }
 
 }
