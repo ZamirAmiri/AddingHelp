@@ -407,8 +407,8 @@ public class DBConnect{
         return builder.build();
     }
 
-    public void deleteNotifications(int userID) {
-        this.query = DBQueries.deleteNotifications(Integer.toString(userID));
+    public void deleteNotifications(String userID) {
+        this.query = DBQueries.deleteNotifications(userID);
         this.connectANDsendINSERT(query);
     }
 
@@ -451,6 +451,121 @@ public class DBConnect{
         builder.add("type", "explore");
         builder.add("messages", arrBuilder);
         builder.add("action","update");
+        return builder.build();
+    }
+
+    public String[] executeQueryAndGetStringArray(String query) {
+        String[] result = null;
+        try{  
+            Class.forName(jdbc);  
+            try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
+                Statement stmt=con.createStatement();
+                this.result = stmt.executeQuery(query);
+                int iterator = 0;
+                while(this.result.next()){
+                    result[iterator] = this.result.getString(1);
+                    iterator++;
+                }
+            }
+        }catch(ClassNotFoundException | SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return result;
+    }
+
+    public String executeQueryAndGetString(String query) {
+        String result = null;
+        try{  
+            Class.forName(jdbc);  
+            try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
+                Statement stmt=con.createStatement();
+                this.result = stmt.executeQuery(query);
+                if(this.result.next()){
+                    result = this.result.getString(1);
+                }
+            }
+        }catch(ClassNotFoundException | SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return result;
+    }
+
+    public JsonObject getFoundationProjects(String foundationName) {
+        this.query = DBQueries.getNewPosts();
+        JsonProvider provider = JsonProvider.provider();
+        JsonArrayBuilder arrBuilder = provider.createArrayBuilder();
+        this.result = null;
+        try{  
+            Class.forName(jdbc);  
+            try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
+                Statement stmt=con.createStatement();
+                this.result = stmt.executeQuery(query);
+                while(this.result.next()){
+                    JsonObjectBuilder builder = provider.createObjectBuilder();
+                    builder.add("short",this.result.getString("short"));
+                    builder.add("content",this.result.getString("content"));
+                    builder.add("title",this.result.getString("title"));
+                    builder.add("hashtags",this.result.getString("hashtags"));
+                    builder.add("foundationname",this.result.getString("foundationname"));
+                    arrBuilder.add(builder);
+                }
+            }
+        }catch(ClassNotFoundException | SQLException e){
+            System.out.println(e.getMessage());
+        }
+        JsonObjectBuilder builder = provider.createObjectBuilder();
+        builder.add("type","new_posts");
+        builder.add("messages", arrBuilder);
+        builder.add("action","update");
+        return builder.build();
+    }
+
+    public JsonObject getPost(String foundationName, String postTitle) {
+        this.query = DBQueries.getPost(foundationName,postTitle);
+        JsonProvider provider = JsonProvider.provider();
+        JsonObjectBuilder builder = provider.createObjectBuilder();
+        JsonArray arr = getPostPictures(foundationName, postTitle);
+        this.result = null;
+        try{  
+            Class.forName(jdbc);  
+            try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
+                Statement stmt=con.createStatement();
+                this.result = stmt.executeQuery(query);
+                if(this.result.next()){
+                    builder.add("short",this.result.getString("short"));
+                    builder.add("content",this.result.getString("content"));
+                    builder.add("title",postTitle);
+                    builder.add("hashtags",this.result.getString("hashtags"));
+                    builder.add("date",this.result.getString("date"));
+                    builder.add("foundationname",foundationName);
+                }
+            }
+        }catch(ClassNotFoundException | SQLException e){
+            System.out.println(e.getMessage());
+        }
+        builder.add("type","post_full");
+        builder.add("pictures", arr);
+        builder.add("action","info");
+        return builder.build();
+    }
+
+    private JsonArray getPostPictures(String foundationName, String postTitle) {
+        this.query = DBQueries.getPostPictures(foundationName,postTitle);
+        JsonProvider provider = JsonProvider.provider();
+        JsonArrayBuilder builder = provider.createArrayBuilder();
+        this.result = null;
+        try{  
+            Class.forName(jdbc);  
+            try (Connection con = DriverManager.getConnection(DBConnect.host,DBConnect.uName,DBConnect.uPass)) {
+                Statement stmt=con.createStatement();
+                this.result = stmt.executeQuery(query);
+                while(this.result.next()){
+                    builder.add(this.result.getString("code"));
+                }
+            }
+        }catch(ClassNotFoundException | SQLException e){
+            System.out.println(e.getMessage());
+        }
         return builder.build();
     }
 }

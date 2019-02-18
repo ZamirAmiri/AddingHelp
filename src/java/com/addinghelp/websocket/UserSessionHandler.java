@@ -87,6 +87,9 @@ public class UserSessionHandler extends Thread {
             case "change_password":
                 this.change_password();
                 break;
+            case "info":
+                this.getInfo();
+                break;
             default:
                 break;
         }
@@ -145,14 +148,18 @@ public class UserSessionHandler extends Thread {
             //System.out.println(query);
             DBConnect.quickInsert(query);
             query =  DBQueries.createDonateQuery(String.valueOf(userId),username,String.valueOf(coins));
-            System.out.println(query);
-            DBConnect.quickInsert(query);
-            query = DBQueries.createDonationNotification(userId,username,coins);
-            System.out.println(query);
             DBConnect.quickInsert(query);
             query = DBQueries.registerDonation(userId,username,coins);
-            System.out.println(query);
             DBConnect.quickInsert(query);
+            query = DBQueries.checkIfLoggedIn(username);
+            String sessionID[] =  this.db.executeQueryAndGetStringArray(query);
+            if(sessionID.length > 0){
+                this.sendDonationNotification(userId,coins,sessionID);
+            }else{
+                query = DBQueries.createDonationNotification(userId,username,coins);
+                DBConnect.quickInsert(query);
+            }
+            
         }else{
             //TODO: send not enough coins alert.
         }
@@ -225,6 +232,7 @@ public class UserSessionHandler extends Thread {
     }
     
     private void getTrendingProjects(){
+        /*
         if(trendingProjects.needRefresh())
         {
             trendingProjects.setCache(this.db.getProjects("0", MIN_PRIORITY));
@@ -232,8 +240,9 @@ public class UserSessionHandler extends Thread {
             trendingProjects.updateTime();
         }else{
             System.out.println("SERVER: Stored data is used");
-        }
-            this.sendToSession(trendingProjects.getCache());
+        }*/
+        System.out.println(this.db.getProjects("0",MIN_PRIORITY));
+        this.sendToSession(this.db.getProjects("0",MIN_PRIORITY));
     }
     private void getOpenProjects(String id){
         System.out.println(this.db.getProjects(id,0).toString());
@@ -264,11 +273,11 @@ public class UserSessionHandler extends Thread {
     private void getNotifications(String userID){
         System.out.println(this.db.getNotifications(userID).toString());
         this.sendToSession(this.db.getNotifications(userID));
-        //this.db.deleteNotifications(userID);
+        this.db.deleteNotifications(userID);
     }
     
     private void search(int cmd){
-        String query = "",searchArg,result;
+        String searchArg;
         searchArg   = this.message.getString("search");
         switch(cmd){
             case 0:
@@ -490,5 +499,57 @@ public class UserSessionHandler extends Thread {
         int userId = users.getUserId(sessionId);
         if(userId != 0)
         users.removeUser(userId, sessionId);
+    }
+
+    private void sendDonationNotification(String userId, String coins,String[] sessions) {
+        String username;
+        Session s; 
+        JsonProvider provider = JsonProvider.provider();
+        JsonObjectBuilder objbuilder = provider.createObjectBuilder();
+        String query = DBQueries.getUsernameById(userId);
+        username = this.db.executeQueryAndGetString(query);
+        String msg = "<".concat(username + "> has donated "+coins+" helpcoins to your project");
+        objbuilder.add("action", "notification");
+        objbuilder.add("type", "donation");
+        objbuilder.add("message", msg);
+        JsonObject obj = objbuilder.build();
+        for (String session1 : sessions) {
+            s = users.getSession(session1);
+            try {
+                s.getBasicRemote().sendText(obj.toString());
+            } catch (IOException ex) {
+                Logger.getLogger(UserSessionHandler.class.getName()).log(Level.SEVERE, null, ex);
+                users.removeUser(Integer.valueOf(userId), session1);
+            }
+        }
+    }
+
+    private void getInfo() {
+        String type = this.message.getString("type");
+        switch(type){
+            case "foundation_projects":
+                this.getFoundationProjects();
+            break;
+            case "foundation_posts":
+                this.getFoundationPosts();
+            break;
+            case "user_project":
+                this.getUserProject();
+            break;
+            case "post_full":
+                this.getPost();
+            break;
+        }
+    }
+    private void getFoundationProjects(){
+        String foundationName = this.message.getString("foundation");
+        System.out.println(this.db.getFoundationProjects(foundationName));
+        this.sendToSession(this.db.getFoundationProjects(foundationName));
+    }
+    private void getPost(){
+        String foundationName = this.message.getString("foundation");
+        String postTitle = this.message.getString("post_title");
+        System.out.println(this.db.getPost(foundationName,postTitle).toString());
+        this.sendToSession(this.db.getPost(foundationName,postTitle));
     }
 }

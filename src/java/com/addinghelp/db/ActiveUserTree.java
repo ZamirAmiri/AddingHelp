@@ -41,6 +41,12 @@ public class ActiveUserTree {
         return null;
     }
     
+    public Session getSession(String sessionId) {
+        if(root != null)
+           return this.root.getSession(sessionId);
+        return null;
+    }
+    
     public int getUserId(String sessionID){
         if(root != null)
             return this.root.getUserId(sessionID);

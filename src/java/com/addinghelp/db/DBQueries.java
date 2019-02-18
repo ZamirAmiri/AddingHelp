@@ -80,7 +80,7 @@ public class DBQueries {
                 + query_two +")";
     }
     private static String selectProject(String projectName){
-        return "SELECT idFROM project WHERE name = '"+ projectName+ "'";
+        return "SELECT id FROM project WHERE name = '"+ projectName+ "'";
     }
     private static String selectProposition(String propositionName){
         return "SELECT id FROM proposition WHERE name = '" + propositionName + "'";
@@ -245,6 +245,29 @@ public class DBQueries {
     }
     public static String checkProjectCompletion(String userId){
         return "SELECT `id` FROM Projects WHERE user = "+userId+" AND completiondate IS NULL";
+    }
+
+    public static String checkIfLoggedIn(String username) {
+        return "Select session From ActiveUsers Where userId in (Select username from ActiveUsers WHERE username = '"+username+"')";
+    }
+
+    public static String getUsernameById(String userId) {
+        return "SELECT username FROM users WHERE id = "+ userId;
+    }
+
+    static String getPostPictures(String foundationName, String postTitle) {
+        return "SELECT FoundationPictures.code from FoundationPictures"
+                + "Inner JOIN Posts AT FoundationPictures.post = Posts.id"
+                + "Inner JOIN Foundations AT FoundationPictures.foundation = Foundation.id"
+                + "WHERE Foundations.name = '" + foundationName+"' "
+                + "AND Posts.title ='"+postTitle+"'";
+    }
+
+    static String getPost(String foundationname, String postTitle) {
+        return "SELECT Posts.short,Posts.content,Posts.date,Posts.hashtags "
+                + "FROM Posts WHERE Posts.foundation = (SELECT id FROM Foundations "
+                + "WHERE foundationname = '"+foundationname+"')"
+                + "AND Posts.title = '"+postTitle+"'";
     }
 
 }
