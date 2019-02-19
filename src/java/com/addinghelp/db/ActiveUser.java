@@ -70,9 +70,7 @@ public class ActiveUser {
     private ActiveUser cleanUp(){
         if(this.L != null)
             this.L.addUser(this.R);
-        else
-            return this.R;
-        return this.L;
+        return this.R;
     }
 
     
@@ -137,6 +135,22 @@ public class ActiveUser {
                 return 0;
             default:
                 return this.userid;
+        }
+    }
+    
+    public Session getSession(String sessionID){
+        int check = ActiveUser.stringComp(this.session.getId(),sessionID);
+        switch (check) {
+            case 0:
+                if(this.L != null)
+                    return this.L.getSession(sessionID);
+                return null;
+            case 2:
+                if(this.R != null)
+                    return this.R.getSession(sessionID);
+                return null;
+            default:
+                return this.session;
         }
     }
     

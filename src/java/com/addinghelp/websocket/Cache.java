@@ -15,12 +15,12 @@ class Cache {
     private int time = 0;
     private Calendar cal = null;
     private JsonObject data;
+    private boolean refresh = true;
     
     public void updateTime(){
         this.makeCalendar();
         this.time = (int) Math.ceil(this.cal.getTimeInMillis()/1000);
         System.out.println("New last update time has been set to :"+ String.valueOf(this.time));
-        
     }
     public void setCache(JsonObject obj){
         this.data = obj;
@@ -33,7 +33,7 @@ class Cache {
     boolean needRefresh() {
         this.makeCalendar();
         int newTime = (int) Math.ceil(this.cal.getTimeInMillis()/1000);
-        return newTime - 3600 >= this.time;
+        return newTime - 3600 >= this.time || this.refresh;
     }
     
     private void makeCalendar(){
@@ -44,6 +44,10 @@ class Cache {
     
     private boolean isEmpty(){
         return this.cal == null;
+    }
+    
+    public void refresh(){
+        this.refresh = true;
     }
     
 }
